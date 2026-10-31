@@ -1,0 +1,386 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Spreadtrum Qogirl6 board common DTS file
+ *
+ * Copyright (C) 2021, Unisoc Inc.
+ */
+
+/dts-v1/;
+/plugin/;
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/clock/sprd,ums9230-clk.h>
+#include <dt-bindings/mfd/sprd,sc2730-regs.h>
+#include <dt-bindings/mfd/sprd,sc2730-mask.h>
+#include <dt-bindings/usb/pd.h>
+#include "../../lcd/lcd_dummy_mipi.dtsi"
+#include "../../lcd/swgreene_P615F02/lcd_gc7272_ctc_dzx_mipi_hdp.dtsi"
+#include "../../lcd/swgreene_P615F02/lcd_gc7272_boe_dzx_mipi_hdp.dtsi"
+#include "../../lcd/swgreene_P615F02/lcd_td4160_boe_token_mipi_hdp.dtsi"
+
+#include "zte_lcd.dtsi"
+#include "../../reserved-memory/ums9230-6h10-overlay.dtsi"
+#include "../../ums9230/wcn.dtsi"
+#include "../../wcn/wcn_modules.h"
+#include "../../wcn/chip/wcn-integrate-sharkl6-register.dtsi"
+
+/ {
+
+	model = "Spreadtrum UMS9230 6H10 Board";
+
+	compatible = "sprd,ums9230-6h10";
+
+	sprd,sc-id = "ums9230 6h10 1000";
+
+	sprd,board_id = <0x610000>; //XXYY00:base board,XXYY00~XXYYFF:customize board
+
+	fragment {
+		target-path = "/";
+		__overlay__ {
+			pwm_backlight: sprd_backlight {
+				compatible = "sprd,sharkl6-backlight";
+				pwms = <&pwms 2 40000>;
+				pwm-names = "backlight";
+				sprd,max-brightness-level = <1023>;
+				sprd,min-brightness-level = <11>;
+				default-brightness-level = <780>;/* max 76 percent */
+				sprd,brightness-scale = <1023>;
+				brightness-levels = <
+					                0   11  11  12  16  20
+					24  28  32  36  40  44  48  52  56  60
+					64  68  72  76  80  84  88  92  96  100
+					104 108 112 116 120 124 128 132 136 140
+					144 148 152 156 160 164 168 172 176 180
+					184 188 192 196 200 204 208 212 216 220
+					224 228 232 236 240 244 248 252 256 260
+					264 268 272 276 280 284 288 292 296 300
+					304 308 312 316 320 324 328 332 336 341
+					345 349 353 357 361 365 369 373 377 381
+					385 389 393 397 401 405 409 413 417 421
+					425 429 433 437 441 445 449 453 457 461
+					465 469 473 477 481 485 489 493 497 501
+					505 509 513 517 521 525 529 533 537 541
+					545 549 553 557 561 565 569 573 577 581
+					585 589 593 597 601 605 609 613 617 621
+					625 629 633 637 641 645 649 653 657 661
+					665 669 673 677 682 686 690 694 698 702
+					706 710 714 718 722 726 730 734 738 742
+					746 750 754 758 762 766 770 774 778 782
+					786 790 794 798 802 806 810 814 818 822
+					826 830 834 838 842 846 850 854 858 862
+					866 870 874 878 882 886 890 894 898 902
+					906 910 914 918 922 926 930 934 938 942
+					946 950 954 958 962 966 970 974 978 982
+					986 990 994 998 1002 1006 1010 1014 1018 1023
+				>;
+			};
+
+			gpio-keys {
+				compatible = "gpio-keys";
+
+				key-volumedown {
+					label = "Volume Down Key";
+					linux,code = <KEY_VOLUMEDOWN>;
+					gpios = <&ap_gpio 124 GPIO_ACTIVE_LOW>;
+					debounce-interval = <2>;
+					wakeup-source;
+				};
+
+				key-volumeup {
+					label = "Volume Up Key";
+					linux,code = <KEY_VOLUMEUP>;
+					gpios = <&pmic_eic 4 GPIO_ACTIVE_HIGH>;
+					debounce-interval = <2>;
+					wakeup-source;
+				};
+
+				key-power {
+					label = "Power Key";
+					linux,code = <KEY_POWER>;
+					gpios = <&pmic_eic 1 GPIO_ACTIVE_LOW>;
+					debounce-interval = <2>;
+					wakeup-source;
+				};
+
+				key-ai {
+					label = "AI Key";
+					linux,code = <KEY_MACRO>;
+					gpios = <&ap_gpio 126 GPIO_ACTIVE_LOW>;
+					debounce-interval = <2>;
+					wakeup-source;
+				};
+			};
+
+			audio-voice-trig {
+				status = "disable";
+				compatible = "sprd,voice_trig";
+				irq_gpio = <&ap_gpio 169 GPIO_ACTIVE_HIGH>;
+			};
+			sprd-uid {
+				compatible = "sprd,uid";
+				nvmem-cells = <&uid_start>, <&uid_end>;
+				nvmem-cell-names = "uid_start", "uid_end";
+			};
+			camera-gpio-main2 {
+				compatible = "camera-gpio-main2";
+				en-als-sub-cam0 = <&ap_gpio 122 0>;
+			};
+
+			LDR: LDR {
+				compatible = "LDR";
+				LDR-gpios = <&ap_gpio 53 0>;
+			};
+		};
+	};
+};
+
+&chosen {
+	bootargs_ext = "kvm-arm.mode=none";
+};
+
+
+
+&i2c5 {
+	status = "okay";
+	clock-frequency = <400000>;
+
+	flash_ic: flash-ic@63 {
+		compatible = "sprd,flash-ocp81378";
+		reg = <0x63>;
+		flash-ic = <81378>;
+		flash-idx = <7>;
+	};
+};
+
+
+&hsphy {
+	vdd-supply = <&vddusb33>;
+	extcon = <&pmic_typec>;
+	/* first value is device eye-patt setting, the second is host */
+	sprd,hsphy-tunehsamp = /bits/ 8 <0x03 0x02>;
+	sprd,hsphy-tuneeq = /bits/ 8 <0x00 0x00>;
+	sprd,hsphy-tfregres = /bits/ 8 <0x02 0x14>;
+	status = "okay";
+};
+
+&usb {
+	extcon = <&pmic_typec>, <&pmic_typec>;
+	vbus-supply = <&vddvbus>;
+	status = "okay";
+	use_pdhub_c2c;
+};
+
+&pmic_typec {
+	use_pdhub_c2c;
+	extcon = <&extcon_gpio>;
+	status = "okay";
+};
+
+&chg_thmzone {
+	status = "disabled";
+};
+
+&sdio0 {
+	cd-gpios = <&eic_sync 35 GPIO_ACTIVE_HIGH>;
+};
+/*
+&i2c2 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	sec-nfc@27 {
+		compatible = "sec-nfc";
+		reg = <0x27>;
+		clock-names = "nfc_clk","source","enable";
+		clocks = <&aon_clk CLK_AUX2>, <&ext_26m>, <&aonapb_gate CLK_AUX2_EB>;
+		sec-nfc,ven-gpio = <&ap_gpio 63 0>;
+		sec-nfc,firm-gpio = <&ap_gpio 61 0>;
+		sec-nfc,irq-gpio = <&ap_gpio 62 0>;
+		sec-nfc,clk-req = <&ap_gpio 60 0>;
+	};
+};
+*/
+&i2c3 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+/*modify by ljh for add flashlight driver #343792 2025-7-4*/
+	aw36515: aw36515@63 {
+		compatible = "sprd,flash-aw36515";
+		reg = <0x63>;
+		sprd,flash-ic = <36515>;
+		sprd,torch = <1>;
+		sprd,preflash = <1>;
+		sprd,highlight = <1>;
+		sprd,torch-level = <128>;
+		sprd,preflash-level = <128>;
+		sprd,highlight-level = <128>;
+		sprd,lvfm-enable = <1>;
+	};
+/*modify by ljh for add flashlight driver #343792 2025-7-4*/
+};
+
+&i2c4 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	stm_vl53l0: vl53l0@52 {
+		compatible = "st,stmvl53l0";
+		reg = <0x52>;
+		reset_gpios = <168>;
+		irq_gpios = <169>;
+		interrupt-parent = <&ap_gpio>;
+		interrupts = <169 IRQ_TYPE_LEVEL_LOW>;
+	};
+};
+
+&aon_i2c0 {
+	status = "okay";
+	clock-frequency = <1000000>;
+};
+
+&sprd_headset {
+	status = "okay";
+	sprd,3pole-adc-threshold = <2950>;
+};
+
+&pdm_dmic {
+	status = "okay";
+};
+
+&agdsp_domain {
+	status = "okay";
+};
+
+&vddldo0 {
+	regulator-always-on;
+};
+&vddldo1 {
+	regulator-always-on;
+}; 
+
+/* enable sensor vddldo2 for als/prx */
+&vddldo2 {
+	regulator-always-on;
+	regulator-min-microvolt = <3200000>;
+	regulator-max-microvolt = <3200000>;
+};
+
+/* enable als sensor vdd_als vddkpled */
+&vddkpled {
+	regulator-always-on;
+	regulator-min-microvolt = <1800000>;
+	regulator-max-microvolt = <1800000>;
+};
+
+&panel {
+	//sprd,backlight = <&pwm_backlight>;
+	avdd-gpio = <&ap_gpio 112 GPIO_ACTIVE_HIGH>;
+	avee-gpio = <&ap_gpio 113 GPIO_ACTIVE_HIGH>;
+	reset-gpio = <&ap_gpio 50 GPIO_ACTIVE_HIGH>;
+};
+
+&dpu {
+	sprd,logo-memory = <&logo_reserved>;
+
+	//sprd,backlight = <&pwm_backlight>;
+};
+
+/*&lcd_g40396_truly_mipi_fhd {
+	sprd,sr-width = <720>;
+	sprd,sr-height = <1600>;
+};
+
+&lcd_nt36672e_truly_mipi_fhd_nodsc {
+	sprd,sr-width = <720>;
+	sprd,sr-height = <1600>;
+};*/
+
+&ddr_dfs {
+	  sprd-scene = "boost", "lcdon", "lcdoff", "camlow",
+			"camhigh", "camveryhigh", "faceid", "top", "boot-opt";
+	  sprd-freq = <1333 768 256 1333 1333 0xbacd 1333 0xbacd 0xbacd>;
+};
+
+&pin_controller {
+	pinctrl-names =
+	/* rfctl16 ,rfctl3, rfctl5 */
+	"gpio_8", "gpio_22", "gpio_24",
+	/* rfctl6, rfctl7, keyin0 */
+	"gpio_25", "gpio_26", "gpio_124",
+	/* bt_rfctl2 */
+	"gpio_175";
+	pinctrl-0 = <&gpio_8>;
+	pinctrl-1 = <&gpio_22>;
+	pinctrl-2 = <&gpio_24>;
+	pinctrl-3 = <&gpio_25>;
+	pinctrl-4 = <&gpio_26>;
+	pinctrl-5 = <&gpio_124>;
+	pinctrl-6 = <&gpio_175>;
+
+	gpio_8: rfctl16 {
+		pins = "QOGIRL6_RFCTL16";
+		function = "func4";
+	};
+
+	gpio_22: rfctl3 {
+		pins = "QOGIRL6_RFCTL3";
+		function = "func4";
+	};
+
+	gpio_24: rfctl5 {
+		pins = "QOGIRL6_RFCTL5";
+		function = "func4";
+	};
+
+	gpio_25: rfctl6 {
+		pins = "QOGIRL6_RFCTL6";
+		function = "func4";
+	};
+
+	gpio_26: rfctl7 {
+		pins = "QOGIRL6_RFCTL7";
+		function = "func4";
+	};
+
+	gpio_124: keyin0 {
+		pins = "QOGIRL6_KEYIN0";
+		function = "func4";
+	};
+
+	gpio_175: bt_rfctl2 {
+		pins = "QOGIRL6_BT_RFCTL2";
+		function = "func4";
+	};
+};
+
+&dmabuf {
+	oemcrypto-reserved {
+		label = "uncached_carveout_oem";
+		memory-region = <&oemcrypto_reserved>;
+	};
+
+	widevine-reserved {
+		label = "uncached_carveout_mm";
+		memory-region = <&widevine_reserved>;
+	};
+
+	protected-reserved {
+		label = "protected";
+		memory-region = <&protected_reserved>;
+	};
+};
+
+&adi_bus {
+	sprd,hw-channels = <2 0x18cc>, <3 0x18cc>, <13 0x1854>, <15 0x1874>,
+			<17 0x1844>, <19 0x1844>, <21 0x1864>, <30 0x1820>,
+			<32 0x197c>, <33 0x1988>, <35 0x19b8>, <39 0x19ac>;
+	sprd,hw-channels0 = <2 0x18cc>, <3 0x18cc>, <13 0x1874>, <15 0x1874>,
+			<17 0x1844>, <19 0x1854>, <21 0x1864>, <30 0x1820>,
+			<32 0x197c>, <33 0x1988>, <35 0x19b8>, <39 0x19ac>;
+	sprd,hw-channels1 = <2 0x18cc>, <3 0x18cc>, <13 0x1854>, <15 0x1874>,
+			<17 0x1844>, <19 0x1844>, <21 0x1864>, <30 0x1820>,
+			<32 0x197c>, <33 0x1988>, <35 0x19b8>, <39 0x19ac>;
+};

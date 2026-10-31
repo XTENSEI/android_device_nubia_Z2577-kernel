@@ -1,0 +1,16 @@
+&i2c2 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	thn31_nfc@28 {
+		status = "okay";
+		compatible = "tms,nfc";
+		reg = <0x28>;
+		tms,device-name = "tms_nfc";
+		tms,device-count = <1>;
+		tms,irq-gpio = <&ap_gpio 55 0>;
+		tms,ven-gpio = <&ap_gpio 62 1>;
+		tms,download-gpio = <&ap_gpio 32 0>;
+		tms,nfc-hardware-check = <&ap_gpio 57 0>;
+	};
+};

@@ -1,0 +1,17 @@
+/*
+ * this file is ued to change sprd dtsi which can't be changed by overlay
+ * such as /delete-node/ /delete-property/ and alises
+ */
+
+#include "zte_touchscreen.dtsi"
+#include "zte_audio.dtsi"
+#include "zte_fingerprint.dtsi"
+#include "zte_nfc_thn31f.dtsi"
+#include "zte_charger.dtsi"
+#include "zte_camera_swgreene.dtsi"
+
+/{
+	zcard_holder_det{
+		zcard-holder-det-gpios=<&eic_sync 32 GPIO_ACTIVE_HIGH>;
+	};
+};

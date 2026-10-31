@@ -1,0 +1,11 @@
+config UNISOC_MAPUSER
+	tristate "UNISOC MapUser Module"
+	depends on ARM || ARM64
+	depends on ARCH_SPRD
+	help
+	  Choose this option can support unisoc mapuser driver used in faceid.
+
+config ZTE_USE_SPRD_FACEID
+	tristate "ZTE_USE_SPRD_FACEID"
+	help
+	  This driver is provided for face recognition of ZTE_USE_SPRD_FACEID.

@@ -1,0 +1,65 @@
+&pin_controller {
+	zte_fp_spi_csn: fp_spi_csn {
+		pins = "QOGIRL6_SPI0_CSN";
+		function = "func1";
+	};
+
+	zte_fp_spi_do: fp_spi_do {
+		pins = "QOGIRL6_SPI0_DO";
+		function = "func1";
+	};
+
+	zte_fp_spi_di: fp_spi_di {
+		pins = "QOGIRL6_SPI0_DI";
+		function = "func1";
+	};
+
+	zte_fp_spi_clk: fp_spi_clk {
+		pins = "QOGIRL6_SPI0_CLK";
+		function = "func1";
+	};
+
+	zte_fp_gpio_90: fp_gpio_90 {
+		pins = "QOGIRL6_SPI0_CSN";
+		function = "func4";
+	};
+
+	zte_fp_gpio_91: fp_gpio_91 {
+		pins = "QOGIRL6_SPI0_DO";
+		function = "func4";
+	};
+
+	zte_fp_gpio_92: fp_gpio_92 {
+		pins = "QOGIRL6_SPI0_DI";
+		function = "func4";
+	};
+
+	zte_fp_gpio_93: fp_gpio_93 {
+		pins = "QOGIRL6_SPI0_CLK";
+		function = "func4";
+	};
+
+};
+
+/ {
+	zte_fp {
+		compatible = "zte,fingerprint";
+		pinctrl-names = "zte_fp_spi", "zte_fp_gpio";
+		pinctrl-0 = <&zte_fp_spi_csn &zte_fp_spi_do &zte_fp_spi_di &zte_fp_spi_clk>;
+		pinctrl-1 = <&zte_fp_gpio_90 &zte_fp_gpio_91 &zte_fp_gpio_92 &zte_fp_gpio_93>;
+	};
+	silead_fp {
+		compatible = "sil,silead_fp";
+		rst-gpios = <&ap_gpio 134 0x00>;
+		irq-gpios = <&eic_async 29 0x00>;
+		vdd-supply = <&vdd28>;
+		power-type = <1>;
+	};
+	focaltech {
+		compatible = "focaltech,fp";
+		focaltech_fp,reset-gpio = <&ap_gpio 134 0>;
+		focaltech_fp,irq-gpio = <&eic_async 29 0x00>;
+		vdd-supply = <&vdd28>;
+		focaltech_fp,use-regulator;
+	};
+};
